@@ -1,1 +1,0 @@
-# ag-oracle-supplierxref-schd
