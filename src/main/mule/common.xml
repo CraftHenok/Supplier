@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd">
+	
+	<sub-flow name="convertBase64toXMLObject" doc:id="619df4a8-1a6e-4a6c-9684-6d56adeb8327">
+		<ee:transform doc:name="Transform Message"
+			doc:id="a4a4f70d-d83b-4fce-a22c-0571f9295264">
+			<ee:message>
+				<ee:set-payload resource="decodeBase64.dwl" />
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message"
+			doc:id="86cb3ff3-1dbc-4ff9-852c-a7f1c3fb3c8d">
+			<ee:message>
+				<ee:set-payload resource="readXMLFromDecodedContent.dwl" />
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message"
+			doc:id="ee1cb032-0df5-4f32-8ee7-f266354fda7f">
+			<ee:message>
+				<ee:set-payload resource="populateCollectionObjectsFromXML.dwl" />
+			</ee:message>
+
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="setSOAPRequest" doc:id="a9103b39-91af-4856-b6d4-ad64d6df9796">
+		<ee:transform doc:name="Transform Message"
+			doc:id="b27f3631-b1bf-4dd4-892f-8913e1d020d5">
+			<ee:message>
+				<ee:set-payload resource="SupplierRequestByLastRun.dwl" />
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<flow name="supplierAccountsImplementationFlow" doc:id="ab21585e-9050-4e9c-91aa-8394ba6a6da3">
+		<set-variable value='#["Custom/Integration/Suppliers/PartySupplierAccounts.xdo"]' doc:name="Set Report Absolute Path Variable" doc:id="5d70e92b-dac2-4ab4-ba34-1dba1f7f34e2" variableName="reportAbsolutePath"/>
+		<set-variable value="#[vars.lastRun]" doc:name="Set Variable" doc:id="d979fc7c-652a-4dac-a08b-ac854c0a9406" variableName="updatedLastRun" />
+		<flow-ref doc:name="setSOAPRequest" doc:id="d829d3c8-4440-44d7-9469-187fb4d133cd" name="setSOAPRequest" />
+		<logger level="INFO" doc:name="Logger" doc:id="d5c079b2-8d47-463a-b5ed-5286852c53e3" message="#[payload]"/>
+		<wsc:consume operation="runReport" doc:name="Consume_ERP_Supplier_Service" doc:id="7607e257-3129-4ac9-84fe-36d8ac74dca8" config-ref="Oracle_Supplier-Webservice_Config"/>
+		<flow-ref doc:name="convertBase64toXMLObject" doc:id="0d4ab0bf-95e6-436c-b09d-2cd928d07820" name="convertBase64toXMLObject" />
+		<ee:transform doc:name="Transform Message" doc:id="35a3fb53-496d-4e67-91e6-55aef85b2e8a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	
+</flow>
+	
+	<flow name="sitesImplementationFlow" doc:id="81a602cd-a7f5-48a0-8345-7a209c4a0836">
+		<set-variable value='#["Custom/Integration/Suppliers/SupplierSites.xdo"]' doc:name="Update Report Absolute Path Variable" doc:id="db98d7de-5f9f-4159-8ee5-d0ef0261af04" variableName="reportAbsolutePath"/>
+		<set-variable value="#[attributes.queryParams.vendorNumber]" doc:name="Set Variable" doc:id="d4ff8481-1743-489e-8866-6f85657c034d" variableName="vendorNumber" />
+		<flow-ref doc:name="setSOAPRequest" doc:id="13794799-d6fe-45f5-8a5e-e36725efbfc4" name="setSOAPRequest" />
+		<logger level="INFO" doc:name="Logger" doc:id="2f7a092a-5ec7-4ce3-857b-f86fe35a448b" message="#[payload]"/>
+		<wsc:consume operation="runReport" doc:name="Consume_ERP_Supplier_Service" doc:id="395d44fe-4f02-4dd5-b044-111b50f3e722" config-ref="Oracle_Supplier-Webservice_Config"/>
+		<flow-ref doc:name="convertBase64toXMLObject" doc:id="bc1562a8-fcb4-4adf-bd9e-bc89e0d79a96" name="convertBase64toXMLObject" />
+		<ee:transform doc:name="Transform Message" doc:id="de792a97-0021-4c57-ae92-c1a9af0ef35a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	
+</flow>
+	
+
+</mule>

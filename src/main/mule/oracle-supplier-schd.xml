@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:java="http://www.mulesoft.org/schema/mule/java"
+	xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd">
+<flow name="accountalignmentintegration-oracleFlow" doc:id="56cc734f-b2f0-4581-8cdc-3c0ef32c6ad7">
+		<http:listener doc:name="Listener" doc:id="99eebd3f-3b24-407d-9462-4cb011e4a612" config-ref="HTTP_Listener_config" path="/sync"/>
+		<db:select doc:name="Fetch Last Run from SYNC_ERPDATA_CONTROLLER"
+			doc:id="53797380-8499-48d0-a490-0c0d76a8d6c1" config-ref="dbConfig"
+			target="lastRun" targetValue="#[payload[0].last_run]">
+			<db:sql>select last_run from SYNC_ERPDATA_CONTROLLER where object =
+				'SUPPLIER' LIMIT 1</db:sql>
+		</db:select>
+		<logger level="INFO" doc:name="Logger" doc:id="06ad2ce0-c0e7-435a-8aac-7c515c90c090" message="#[payload]"/>
+		<java:invoke-static doc:name="Invoke static"
+			doc:id="44c7d6ee-8253-40e3-bcf7-680017c95690" class="com.erp.cloud.utils.DateUtils"
+			method="convertSqlTimestampToERPCloudFormat(String)" target="updatedLastRun">
+			<java:args><![CDATA[#[{
+	lastRun: vars.lastRun as String
+}]]]></java:args>
+		</java:invoke-static>
+		<!-- <flow-ref doc:name="setSOAPRequest" doc:id="f1411558-98cb-44d4-b0e5-be86bc3a956b" 
+			name="setSOAPRequest" /> <wsc:consume operation="runReport" doc:name="Consume_ERP_Supplier_Service" 
+			doc:id="b5ecbbf1-d559-4f8d-821f-bb9a831f2f8f" config-ref="PublicReportService_WebService_Config"/> 
+			<flow-ref doc:name="convertBase64toXMLObject" doc:id="892293fe-a35f-4a4b-8bc7-eff13d77a3ec" 
+			name="convertBase64toXMLObject" /> -->
+		<flow-ref doc:name="Flow Reference" doc:id="e74332fc-3ccf-4a1d-819b-5daaf7656a5a" name="Mock_SOAP_SUPPLIER_CALL"/>
+		<logger level="INFO" doc:name="Logger" doc:id="d294420c-d0b3-4454-b880-7136e6c4a785" message="#[payload]"/>
+		<foreach doc:name="For Each" doc:id="b28050bc-2157-47cd-986e-eaa7a3b9fdd8">
+			<flow-ref doc:name="updateSingleAccountFlow" doc:id="90d5126a-7ad8-4867-8931-2b1109f7ee1b" name="updateSingleAccountFlow"/>
+			<!-- <flow-ref doc:name="setSOAPRequest" doc:id="8b148511-0488-4bb6-b380-d22f45daa164" 
+				name="setSOAPRequest" /> <wsc:consume doc:name="Consume_ERP_SupplierSite_Service" 
+				doc:id="03b10a1b-984f-4f08-b625-94cf6de77112" config-ref="PublicReportService_WebService_Config" 
+				operation="runReport" /> <flow-ref doc:name="convertBase64toXMLObject" doc:id="37d7657f-2b99-4258-bc86-298c66fe6d23" 
+				name="convertBase64toXMLObject" /> -->
+		</foreach>
+		<error-handler>
+			<on-error-propagate enableNotifications="true"
+				logException="true" doc:name="On Error Propagate" doc:id="66d5e6ec-d0ed-4814-9adf-84d43a6b1660">
+				<logger level="INFO" doc:name="Logger"
+					doc:id="7a3f1f9a-f001-48b7-8692-4ed3b5848de0" />
+				<email:send doc:name="Send"
+					doc:id="0002cf6c-7590-48b7-bf57-c5b499ed9b89" fromAddress="craft.henok@gmail.com"
+					subject='#["Error with in Supplier Data" ++ vars.headerFieldsFromXML.supplierName default " Supplier Name not available"]'
+					config-ref="Email_SMTP" toAddresses='#[["emengistu@indigoag.com"]]'>
+					<email:body>
+						<email:content><![CDATA[#[error.detailedDescription]]]></email:content>
+					</email:body>
+				</email:send>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="updateSingleAccountFlow" doc:id="7effb9ea-8205-4d49-93d7-da3f2a20d482">
+		<set-variable value="#[payload.VENDORNUMBER]" doc:name="Set Variable" doc:id="c3cf0add-bc72-4fac-a468-0d82f297ddf2" variableName="vendorNumber" />
+			<ee:transform doc:name="Transform Message" doc:id="433da8d5-f852-46e7-a451-0e5bee32c0d7">
+				<ee:message>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable resource="populateSupplierObjDetails.dwl" variableName="supplierObjDetails" />
+					
+						<ee:set-variable resource="populateHeaderFiledsFromXML.dwl" variableName="headerFieldsFromXML" />
+					
+				</ee:variables>
+			</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="39c9de61-5d5c-4bc2-8ed7-7c2007fc7439" message="#[payload]" />
+		<db:stored-procedure doc:name="Call Supplier Stored Procedure" doc:id="0f280d64-9578-42a5-b130-3c7a2add5004" config-ref="dbConfig">
+			<db:sql>{ call spUpdateSupplierDataXref(:supplierId, :supplierNum,
+				:supplierName, :OracleSFID, :supplierStatus, :LastUpdatedBy,
+				:xrefSFsuppIndigoIDDiff, :xrefSFsuppsiteIndigoID,:env) }</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	"supplierId" : payload.VENDOR_ID,
+	"supplierNum" : vars.vendorNumber,
+	"supplierName" : payload.VENDOR_NAME, 
+	"OracleSFID" : payload.INDIGOID,
+	"supplierStatus" : payload.PARTYSTATUS,
+	"LastUpdatedBy" : payload.SUPPLIERLASTUPDATEDBY,
+	"env" : "${env}"
+}]]]></db:input-parameters>
+			<db:output-parameters>
+				<db:output-parameter key="xrefSFsuppIndigoIDDiff" type="VARCHAR" />
+				<db:output-parameter key="xrefSFsuppsiteIndigoID" type="VARCHAR" />
+			</db:output-parameters>
+		</db:stored-procedure>
+		<logger level="INFO" doc:name="Logger" doc:id="9eb840fb-893c-4af0-8a7d-619e32ec4a97" message="#[payload]" />
+		<choice doc:name="Choice" doc:id="e7a83f2c-2f0a-4f2e-8fa7-ba560a36a652">
+			<when expression='#[payload.xrefSFsuppIndigoIDDiff == "Y"]'>
+				<logger level="INFO" doc:name="Logger" doc:id="c46d3473-2d39-4cb2-a2e7-1a68bf18f79b" message="#[payload]"/>
+			</when>
+			<when expression='#[payload.xrefSFsuppIndigoIDDiff == "H"]'>
+				<email:send doc:name="Send" doc:id="21d42add-acdf-49df-91d8-167397bb76cc" fromAddress="craft.henok@gmail.com" subject='#[%dw 2.0
+output application/java
+---
+"Mismatch of Oracle SF ID in Cross Reference Table For Supplier : " ++  vars.headerFieldsFromXML.supplierName]' config-ref="Email_SMTP" toAddresses='#[["dvallabhaneni@indigoag.com"]]'>
+					<email:body>
+						<email:content><![CDATA[#[%dw 2.0
+output application/java
+---
+"Mismatch of Oracle SF ID in Cross Reference Table For Supplier : " ++   vars.headerFieldsFromXML.supplierName ++ "Supplier Number " ++ vars.vendorNumber]]]></email:content>
+					</email:body>
+				</email:send>
+			</when>
+			<otherwise>
+				<logger level="INFO" doc:name="Logger" doc:id="6cf5747f-0a43-4e16-89b1-b625e3e48ab2" message="No records mismatch : #[vars.supplierSPOutput.xrefSFsuppsiteIndigoID]" />
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="3a153820-e61d-402a-a6cd-5eec1250e610" message="#[payload]" />
+		<flow-ref doc:name="Flow Reference" doc:id="12f4d926-2499-4d3f-9e02-db3a92a6c19f" name="Mock_SOAP_SUPPLIER_SITE_CALL" />
+		<logger level="INFO" doc:name="Logger" doc:id="63f69eee-876f-4ed0-b247-6229d09cb87d" message="#[payload]" />
+		<foreach doc:name="For Each" doc:id="3a05069f-91da-4efb-9395-8628114a2675">
+					<db:stored-procedure doc:name="Stored procedure" doc:id="8e9cb979-4a3f-4c30-aa1a-8b7e7549fcc1" config-ref="Mysql_Database_Config">
+				<db:sql>{ call spUpdateSuppSitesDataXref (:supplierId, :supplierNum,
+					:SiteID, :SiteNumber, :Suppstatus, :Suppsitestatus, :LastUpdatedBy,
+					:OracleSFID, :xrefSFsuppsiteIndigoIDDiff, :xrefSFsuppsiteIndigoID,
+					:env, :AddrPuposeRemitTo) }</db:sql>
+				<db:input-parameters><![CDATA[#[{
+	"supplierId" : vars.supplierObjDetails.supplierId,
+	"supplierNum" : vars.vendorNumber,
+	"SiteID" : payload.PARTY_SITE_ID,
+	"SiteNumber" : payload.PARTY_SITE_NAME,
+	"Suppstatus" : vars.supplierObjDetails.supplierStatus, 
+	"Suppsitestatus" : payload.STATUS,
+	"LastUpdatedBy" : payload.LAST_UPDATED_BY,
+	"OracleSFID" : vars.supplierObjDetails.INDIGOID,
+	"env" : "${env}",
+	"AddrPuposeRemitTo" : payload.ADDRESS_PURPOSE_REMIT_TO
+	
+}]]]></db:input-parameters>
+				<db:output-parameters>
+					<db:output-parameter key="xrefSFsuppsiteIndigoIDDiff" type="VARCHAR" />
+					<db:output-parameter key="xrefSFsuppsiteIndigoID" type="VARCHAR" />
+				</db:output-parameters>
+			</db:stored-procedure>
+		</foreach>
+	</flow>
+</mule>

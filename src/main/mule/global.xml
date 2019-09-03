@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd 
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+	 
+	 <configuration-properties doc:name="Configuration properties" doc:id="2f6519a2-6f15-4263-adbf-81b2e7f2ba52" file="config/supplier-store-xref-${env}.properties" />
+	 	<db:config name="dbConfig">
+		<db:my-sql-connection   host="sql3.freemysqlhosting.net"
+  port="3306"
+  user="sql3303953"
+  password= "FIMTVcx6CM"
+  database="sql3303953" />
+
+</db:config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="fe86a168-602e-4ce4-af1b-b1052fbc5862" >
+		<db:my-sql-connection   host="sql3.freemysqlhosting.net"
+  port="3306"
+  user="sql3303953"
+  password= "FIMTVcx6CM"
+  database="sql3303953" />
+	</db:config>
+		<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="22619e65-2a7b-43aa-923e-62d342bfa371" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	
+	 <db:config name="Mysql_Database_Config" doc:name="Database Config"
+		doc:id="74ab61ed-71ff-4d14-8786-56c4621065e9">
+		<db:my-sql-connection host="${iag.intapp.host}" port="${iag.intapp.port}" user="${iag.intapp.user}" password="${iag.intapp.password}" database="${iag.intapp.database}" />
+	</db:config>
+	<wsc:config name="Oracle_Supplier-Webservice_Config" doc:name="Web Service Consumer Config" doc:id="fcfb68b4-6e6b-45ba-9e41-c5cd33bc6007" >
+		<wsc:connection wsdlLocation="${supplier.account.service.wsdl}" service="${supplier.account.service.service}" port="${supplier.account.service.port}" address="${supplier.account.service.address}" />
+	</wsc:config>
+<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="26b27ab4-4c76-4dc4-95a0-52b3e4baf96a" >
+		<email:smtp-connection host="${email.host}" port="${email.port}" user="${email.username}" password="${email.password}" >
+			<email:properties >
+				<email:property key="mail.smtp.starttls.enable" value="true" />
+			</email:properties>
+		</email:smtp-connection>
+	</email:smtp-config>
+	<global-property doc:name="Global Property" doc:id="cd02b7a4-2c34-4a13-9977-46dca28202b5" name="env" value="DEV" />
+
+</mule>

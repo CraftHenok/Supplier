@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="6400abb0-5c70-4436-8fb2-6e55fb295a68" basePath="/mockendpoint" >
+		<http:request-connection host="localhost" port="80" />
+	</http:request-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="40154abc-0dfc-4fca-aafe-47f999b6bd2e" />
+	<flow name="Mock_SOAP_SUPPLIER_CALL" doc:id="ea93de75-b6f5-409e-8994-6abf29d5b0bc" >
+		<file:read doc:name="Read" doc:id="4ead9f1a-2aea-4359-8978-0329b76f78da" config-ref="File_Config" path="supplier.json"/>
+		<logger level="INFO" doc:name="Logger" doc:id="dd1b85ca-8f01-484f-a4c1-871d71e8201d" />
+	</flow>
+	<flow name="Mock_SOAP_SUPPLIER_SITE_CALL" doc:id="43c33c27-96d1-4056-be71-23b17d363ef7" >
+		<file:read doc:name="Read" doc:id="85186130-a87e-446c-88c4-1e8c04d24913" config-ref="File_Config" path="suppliersite.json" />
+		<logger level="INFO" doc:name="Logger" doc:id="3d1d938c-95d9-4b56-a7da-22bdc618cece" />
+	</flow>
+</mule>

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<munit:config name="local-data-test-suite.xml" />
+	<munit:test name="local-data-test-data-test" description="Test" doc:id="dacb5e71-6f41-4035-8e58-53ee0057983d" >
+		<munit:execution >
+			<db:delete doc:name="Delete" doc:id="f698087a-a24d-4458-88c0-894d6d81f37f" config-ref="dbConfig">
+				<db:sql >DELETE  FROM `iag-intapp-dev`.`system_key_map` </db:sql>
+			</db:delete>
+			<db:stored-procedure doc:name="Stored procedure" doc:id="38cfbb41-3d77-479a-8623-58eed767a521" config-ref="dbConfig">
+				<db:sql >{ call spUpdateSupplierDataXref(:supplierId, :supplierNum,
+				:supplierName, :OracleSFID, :supplierStatus, :LastUpdatedBy,
+				:xrefSFsuppIndigoIDDiff, :xrefSFsuppsiteIndigoID,:env) }</db:sql>
+				<db:input-parameters ><![CDATA[#[{
+	"supplierId" : 23,
+	"supplierNum" : 343,
+	"supplierName" : 'Name', 
+	"OracleSFID" : 2321,
+	"supplierStatus" : 'A',
+	"LastUpdatedBy" : 'Updater',
+	"env" : "${env}"
+}]]]></db:input-parameters>
+			</db:stored-procedure>
+		</munit:execution>
+		<munit:validation >
+			<db:select doc:name="Select" doc:id="c81d3da0-0038-4574-820d-348ce2094221" config-ref="dbConfig">
+				<db:sql >SELECT * FROM `iag-intapp-dev`.system_key_map </db:sql>
+			</db:select>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="8412a5d8-0ebc-4854-8ac8-c54343fecb18" expression="#[payload]" is="MunitTools::notNullValue()"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="local-data-test-OindigoId-Verify-Test" description="MUnit Test" doc:id="4c79b921-b232-44ff-8844-8139542a6352" >
+		<munit:execution >
+			<db:delete doc:name="Delete" doc:id="d32fc89c-e398-4443-a15c-365e8adf69d2" config-ref="dbConfig">
+				<db:sql >DELETE  FROM `iag-intapp-dev`.`system_key_map` </db:sql>
+			</db:delete>
+			<db:stored-procedure doc:name="Stored procedure" doc:id="029692d2-58a8-42e3-b48b-f083d1a5fc42" config-ref="dbConfig">
+				<db:sql >{ call spUpdateSupplierDataXref(:supplierId, :supplierNum,
+				:supplierName, :OracleSFID, :supplierStatus, :LastUpdatedBy,
+				:xrefSFsuppIndigoIDDiff, :xrefSFsuppsiteIndigoID,:env) }</db:sql>
+			</db:stored-procedure>
+			<db:stored-procedure doc:name="Stored procedure" doc:id="3b5de239-68e0-4240-aa97-e5e731f28550" config-ref="dbConfig">
+				<db:sql >{ call spUpdateSupplierDataXref(:supplierId, :supplierNum,
+				:supplierName, :OracleSFID, :supplierStatus, :LastUpdatedBy,
+				:xrefSFsuppIndigoIDDiff, :xrefSFsuppsiteIndigoID,:env) }</db:sql>
+			</db:stored-procedure>
+		</munit:execution>
+		<munit:validation>
+			<db:select doc:name="Select" doc:id="f7e76b7d-998a-4ecd-8917-5267beaa4caf" config-ref="dbConfig">
+				<db:sql >SELECT count(Env) FROM `iag-intapp-dev`.system_key_map  where verified = 1</db:sql>
+			</db:select>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="ff852b3c-9b41-4fcc-9097-bf0ada811210" expression="#[payload]" is="#[MunitTools::greaterThan(0)]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="local-data-test-OindigoId-Removed-Verify-To-False" description="MUnit Test" doc:id="d8453b7c-9ed6-4643-a786-66a80f736d91" >
+		<munit:execution >
+			<db:delete doc:name="Delete" doc:id="4e9b2834-54c9-41df-9f47-669b0c2a1a62" config-ref="dbConfig">
+				<db:sql >DELETE  FROM `iag-intapp-dev`.`system_key_map` </db:sql>
+			</db:delete>
+			<db:stored-procedure doc:name="Stored procedure" doc:id="e2a09842-2974-4d20-bb44-5980502c9800" config-ref="dbConfig">
+				<db:sql >{ call spUpdateSupplierDataXref(:supplierId, :supplierNum,
+				:supplierName, :OracleSFID, :supplierStatus, :LastUpdatedBy,
+				:xrefSFsuppIndigoIDDiff, :xrefSFsuppsiteIndigoID,:env) }</db:sql>
+				<db:input-parameters ><![CDATA[#[{
+	"supplierId" : 23,
+	"supplierNum" : 343,
+	"supplierName" : 'Name', 
+	"OracleSFID" : 2321,
+	"supplierStatus" : 'A',
+	"LastUpdatedBy" : 'Updater',
+	"env" : "${env}"
+}]]]></db:input-parameters>
+			
+</db:stored-procedure>
+			<db:stored-procedure doc:name="Stored procedure" doc:id="b535e262-daed-4960-a502-0e990d223206" config-ref="dbConfig">
+				<db:sql >{ call spUpdateSupplierDataXref(:supplierId, :supplierNum,
+				:supplierName, :OracleSFID, :supplierStatus, :LastUpdatedBy,
+				:xrefSFsuppIndigoIDDiff, :xrefSFsuppsiteIndigoID,:env) }</db:sql>
+				<db:input-parameters ><![CDATA[#[{
+	"supplierId" : 23,
+	"supplierNum" : 343,
+	"supplierName" : 'Name', 
+	"OracleSFID" : ,
+	"supplierStatus" : 'A',
+	"LastUpdatedBy" : 'Updater',
+	"env" : "${env}"
+}]]]></db:input-parameters>
+			
+</db:stored-procedure>
+		</munit:execution>
+		<munit:validation>
+			<db:select doc:name="Select" doc:id="65b42530-f45e-49e9-ba8c-3cbf4f3523f2" config-ref="dbConfig">
+				<db:sql >SELECT count(Env) FROM `iag-intapp-dev`.system_key_map   where verified = 0</db:sql>
+			</db:select>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="666fae88-d6fa-4dab-8d6d-a2151962757a" expression="#[payload]" is="#[MunitTools::greaterThan(0)]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="local-data-test-inital-data-with-IndigioID-must-be-verified" description="MUnit Test" doc:id="76c44618-94a2-4171-b2dd-7c7ce461d401" >
+		<munit:execution >
+			<db:delete doc:name="Delete" doc:id="65c4eb61-4ea8-44b7-9796-878feaf10116" config-ref="dbConfig">
+				<db:sql >DELETE  FROM `iag-intapp-dev`.`system_key_map` </db:sql>
+			</db:delete>
+			<db:stored-procedure doc:name="Stored procedure" doc:id="8e9cb979-4a3f-4c30-aa1a-8b7e7549fcc1" config-ref="Mysql_Database_Config">
+				<db:sql>{ call spUpdateSupplierDataXref(:supplierId, :supplierNum,
+				:supplierName, :OracleSFID, :supplierStatus, :LastUpdatedBy,
+				:xrefSFsuppIndigoIDDiff, :xrefSFsuppsiteIndigoID,:env) }</db:sql>
+				<db:input-parameters><![CDATA[#[{
+	"supplierId" : 23,
+	"supplierNum" : 343,
+	"supplierName" : 'Name', 
+	"OracleSFID" : 2321,
+	"supplierStatus" : 'A',
+	"LastUpdatedBy" : 'Updater',
+	"env" : "${env}"
+}]]]></db:input-parameters>
+				<db:output-parameters>
+					<db:output-parameter key="xrefSFsuppsiteIndigoIDDiff" type="VARCHAR" />
+					<db:output-parameter key="xrefSFsuppsiteIndigoID" type="VARCHAR" />
+				</db:output-parameters>
+			<db:sql>{ call spUpdateSuppSitesDataXref (:supplierId, :supplierNum,
+					:SiteID, :SiteNumber, :Suppstatus, :Suppsitestatus, :LastUpdatedBy,
+					:OracleSFID, :xrefSFsuppsiteIndigoIDDiff, :xrefSFsuppsiteIndigoID,
+					:env, :AddrPuposeRemitTo) }</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	"supplierId" : vars.supplierObjDetails.supplierId,
+	"supplierNum" : vars.vendorNumber,
+	"SiteID" : payload.PARTY_SITE_ID,
+	"SiteNumber" : payload.PARTY_SITE_NAME,
+	"Suppstatus" : vars.supplierObjDetails.supplierStatus, 
+	"Suppsitestatus" : payload.STATUS,
+	"LastUpdatedBy" : payload.LAST_UPDATED_BY,
+	"OracleSFID" : vars.supplierObjDetails.INDIGOID,
+	"env" : "${env}",
+	"AddrPuposeRemitTo" : payload.ADDRESS_PURPOSE_REMIT_TO
+	
+}]]]></db:input-parameters>
+			
+</db:stored-procedure>
+		</munit:execution>
+		<munit:validation >
+			<db:select doc:name="Select" doc:id="a3c7c50f-48b3-4536-bb8c-3b3558839eaf" config-ref="dbConfig">
+				<db:sql >SELECT * FROM `iag-intapp-dev`.system_key_map where verified = 1</db:sql>
+			</db:select>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="f5141dda-68fe-439f-aeba-8e7460c451f3" expression="#[payload]" is="#[MunitTools::equalTo(1)]"/>
+		</munit:validation>
+	</munit:test>
+	<flow name="local-data-test-suiteFlow" doc:id="ba83f692-03d9-47f0-8af5-36d3d003dbbc" >
+	</flow>
+
+
+</mule>
