@@ -23,12 +23,7 @@
 				<extensions>true</extensions>
 				<configuration>
 					<classifier>mule-application</classifier>
-                <sharedLibraries>
-                        <sharedLibrary>
-                            <groupId>com.mycompany</groupId>
-                            <artifactId>mysql-connector-java-8.0.17</artifactId>
-                        </sharedLibrary>
-                    </sharedLibraries>
+             
                 </configuration>
 			</plugin>
 			<plugin>
