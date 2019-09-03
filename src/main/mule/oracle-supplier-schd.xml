@@ -21,7 +21,7 @@ http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/jav
 		<db:select doc:name="Fetch Last Run from SYNC_ERPDATA_CONTROLLER"
 			doc:id="53797380-8499-48d0-a490-0c0d76a8d6c1" config-ref="dbConfig"
 			target="lastRun" targetValue="#[payload[0].last_run]">
-			<db:sql>select last_run from SYNC_ERPDATA_CONTROLLER where object =
+			<db:sql>select last_run from sql3303953.sync_erpdata_controller where object =
 				'SUPPLIER' LIMIT 1</db:sql>
 		</db:select>
 		<logger level="INFO" doc:name="Logger" doc:id="06ad2ce0-c0e7-435a-8aac-7c515c90c090" message="#[payload]"/>
@@ -55,7 +55,7 @@ http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/jav
 				<email:send doc:name="Send"
 					doc:id="0002cf6c-7590-48b7-bf57-c5b499ed9b89" fromAddress="craft.henok@gmail.com"
 					subject='#["Error with in Supplier Data" ++ vars.headerFieldsFromXML.supplierName default " Supplier Name not available"]'
-					config-ref="Email_SMTP" toAddresses='#[["emengistu@indigoag.com"]]'>
+					config-ref="Email_SMTP" toAddresses='#[["craft.henok@gmail.com"]]'>
 					<email:body>
 						<email:content><![CDATA[#[error.detailedDescription]]]></email:content>
 					</email:body>
@@ -103,7 +103,7 @@ http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/jav
 				<email:send doc:name="Send" doc:id="21d42add-acdf-49df-91d8-167397bb76cc" fromAddress="craft.henok@gmail.com" subject='#[%dw 2.0
 output application/java
 ---
-"Mismatch of Oracle SF ID in Cross Reference Table For Supplier : " ++  vars.headerFieldsFromXML.supplierName]' config-ref="Email_SMTP" toAddresses='#[["dvallabhaneni@indigoag.com"]]'>
+"Mismatch of Oracle SF ID in Cross Reference Table For Supplier : " ++  vars.headerFieldsFromXML.supplierName]' config-ref="Email_SMTP" toAddresses='#[["craft.henok@gmail.com"]]'>
 					<email:body>
 						<email:content><![CDATA[#[%dw 2.0
 output application/java
