@@ -19,8 +19,7 @@ http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/jav
 <flow name="accountalignmentintegration-oracleFlow" doc:id="56cc734f-b2f0-4581-8cdc-3c0ef32c6ad7">
 		<http:listener doc:name="Listener" doc:id="99eebd3f-3b24-407d-9462-4cb011e4a612" config-ref="HTTP_Listener_config" path="/sync"/>
 		<db:select doc:name="Fetch Last Run from SYNC_ERPDATA_CONTROLLER"
-			doc:id="53797380-8499-48d0-a490-0c0d76a8d6c1" config-ref="dbConfig"
-			target="lastRun" targetValue="#[payload[0].last_run]">
+			doc:id="53797380-8499-48d0-a490-0c0d76a8d6c1" target="lastRun" targetValue="#[payload[0].last_run]" config-ref="Mysql_Database_Config">
 			<db:sql>select last_run from sql3303953.sync_erpdata_controller where object =
 				'SUPPLIER' LIMIT 1</db:sql>
 		</db:select>
@@ -76,7 +75,7 @@ http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/jav
 				</ee:variables>
 			</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="39c9de61-5d5c-4bc2-8ed7-7c2007fc7439" message="#[payload]" />
-		<db:stored-procedure doc:name="Call Supplier Stored Procedure" doc:id="0f280d64-9578-42a5-b130-3c7a2add5004" config-ref="dbConfig">
+		<db:stored-procedure doc:name="Call Supplier Stored Procedure" doc:id="0f280d64-9578-42a5-b130-3c7a2add5004" config-ref="Mysql_Database_Config">
 			<db:sql>{ call spUpdateSupplierDataXref(:supplierId, :supplierNum,
 				:supplierName, :OracleSFID, :supplierStatus, :LastUpdatedBy,
 				:xrefSFsuppIndigoIDDiff, :xrefSFsuppsiteIndigoID,:env) }</db:sql>
