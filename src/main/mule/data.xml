@@ -10,11 +10,11 @@ http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/fil
 	</http:request-config>
 	<file:config name="File_Config" doc:name="File Config" doc:id="40154abc-0dfc-4fca-aafe-47f999b6bd2e" />
 	<flow name="Mock_SOAP_SUPPLIER_CALL" doc:id="ea93de75-b6f5-409e-8994-6abf29d5b0bc" >
-		<file:read doc:name="Read" doc:id="4ead9f1a-2aea-4359-8978-0329b76f78da" config-ref="File_Config" path="supplier.json"/>
+		<file:read doc:name="Read" doc:id="4ead9f1a-2aea-4359-8978-0329b76f78da" config-ref="File_Config" path="#[p('app.home')++&quot;/data/supplier.json&quot;]"/>
 		<logger level="INFO" doc:name="Logger" doc:id="dd1b85ca-8f01-484f-a4c1-871d71e8201d" />
 	</flow>
 	<flow name="Mock_SOAP_SUPPLIER_SITE_CALL" doc:id="43c33c27-96d1-4056-be71-23b17d363ef7" >
-		<file:read doc:name="Read" doc:id="85186130-a87e-446c-88c4-1e8c04d24913" config-ref="File_Config" path="suppliersite.json" />
+		<file:read doc:name="Read" doc:id="85186130-a87e-446c-88c4-1e8c04d24913" config-ref="File_Config" path="#[p('app.home')++&quot;/data/suppliersite.json&quot;]" />
 		<logger level="INFO" doc:name="Logger" doc:id="3d1d938c-95d9-4b56-a7da-22bdc618cece" />
 	</flow>
 </mule>
